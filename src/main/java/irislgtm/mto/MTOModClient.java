@@ -10,7 +10,9 @@ import mekanism.client.render.lib.Outlines;
 import mekanism.client.render.lib.Outlines.Line;
 import mekanism.common.block.attribute.Attribute;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.RandomSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
@@ -64,6 +66,19 @@ public class MTOModClient {
         if (tier == null) {
             return;
         }
+        if (BuiltInRegistries.BLOCK.getKey(state.getBlock()).getPath().contains("tank")) {
+            Vec3 camera = event.getCamera().getPosition();
+            int[] rgb = tier.getRgbCode();
+            float red = rgb[0] / 255F;
+            float green = rgb[1] / 255F;
+            float blue = rgb[2] / 255F;
+            event.setCanceled(true);
+            LevelRenderer.renderLineBox(event.getPoseStack(), event.getMultiBufferSource().getBuffer(RenderType.lines()),
+                  pos.getX() - camera.x, pos.getY() - camera.y, pos.getZ() - camera.z,
+                  pos.getX() + 1D - camera.x, pos.getY() + 1D - camera.y, pos.getZ() + 1D - camera.z,
+                  red, green, blue, MTOConfig.OUTLINE_OPACITY.get().floatValue());
+            return;
+        }
         List<Line> lines = cachedWireFrames.get(state);
         if (lines == null) {
             BakedModel bakedModel = Minecraft.getInstance().getBlockRenderer().getBlockModel(state);
@@ -83,7 +98,7 @@ public class MTOModClient {
         matrix.pushPose();
         matrix.translate(pos.getX() - camera.x, pos.getY() - camera.y, pos.getZ() - camera.z);
         event.setCanceled(true);
-        renderVertexWireFrame(lines, event.getMultiBufferSource().getBuffer(RenderType.lines()), matrix.last().pose(), matrix.last().normal(), red, green, blue, 0.4F);
+        renderVertexWireFrame(lines, event.getMultiBufferSource().getBuffer(RenderType.lines()), matrix.last().pose(), matrix.last().normal(), red, green, blue, MTOConfig.OUTLINE_OPACITY.get().floatValue());
         matrix.popPose();
     }
 
