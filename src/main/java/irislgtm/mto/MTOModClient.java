@@ -140,17 +140,26 @@ public class MTOModClient {
         for (LineData line : lines) {
             poseNormal.transform(line.nX, line.nY, line.nZ, normal);
 
+<<<<<<< Updated upstream
             pose.transform(line.x1, line.y1, line.z1, 1F, pos);
+=======
+            pose.transform(line.x1(), line.y1(), line.z1(), 1F, pos);
+>>>>>>> Stashed changes
             buffer.vertex(pos.x, pos.y, pos.z)
                 .color(red, green, blue, alpha)
                 .normal(normal.x, normal.y, normal.z)
                 .endVertex();
 
+<<<<<<< Updated upstream
             pose.transform(line.x2, line.y2, line.z2, 1F, pos);
+=======
+            pose.transform(line.x2(), line.y2(), line.z2(), 1F, pos);
+>>>>>>> Stashed changes
             buffer.vertex(pos.x, pos.y, pos.z)
                 .color(red, green, blue, alpha)
                 .normal(normal.x, normal.y, normal.z)
                 .endVertex();
+<<<<<<< Updated upstream
         }
     }
 
@@ -175,6 +184,8 @@ public class MTOModClient {
             this.nX = nX;
             this.nY = nY;
             this.nZ = nZ;
+=======
+>>>>>>> Stashed changes
         }
     }
 }
