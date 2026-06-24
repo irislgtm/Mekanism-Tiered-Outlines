@@ -2,6 +2,7 @@ package irislgtm.mto;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.HashMap;
@@ -13,7 +14,9 @@ import mekanism.common.block.attribute.Attribute;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.commands.Commands;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.RandomSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
@@ -23,6 +26,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult.Type;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.client.event.RenderHighlightEvent;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.common.MinecraftForge;
@@ -36,9 +40,35 @@ public class MTOModClient {
 
     public MTOModClient() {
         MinecraftForge.EVENT_BUS.addListener(this::onBlockHighlight);
+        MinecraftForge.EVENT_BUS.addListener(this::onRegisterClientCommands);
+    }
+
+    private void onRegisterClientCommands(RegisterClientCommandsEvent event) {
+        event.getDispatcher().register(Commands.literal("mto")
+            .then(Commands.literal("toggle")
+                .executes(ctx -> {
+                    boolean current = MTOConfig.MOD_ENABLED.get();
+                    MTOConfig.MOD_ENABLED.set(!current);
+                    MTOConfig.CLIENT_SPEC.save();
+                    ctx.getSource().sendSuccess(() -> Component.literal(current ? "OFF" : "ON"), false);
+                    return 1;
+                }))
+            .then(Commands.literal("opacity")
+                .then(Commands.argument("value", IntegerArgumentType.integer(0, 100))
+                    .executes(ctx -> {
+                        int val = IntegerArgumentType.getInteger(ctx, "value");
+                        MTOConfig.OUTLINE_OPACITY.set(val / 100.0);
+                        MTOConfig.CLIENT_SPEC.save();
+                        ctx.getSource().sendSuccess(() -> Component.literal(val + "%"), false);
+                        return 1;
+                    })))
+        );
     }
 
     private void onBlockHighlight(RenderHighlightEvent.Block event) {
+        if (!MTOConfig.MOD_ENABLED.get()) {
+            return;
+        }
         Player player = Minecraft.getInstance().player;
         if (player == null) {
             return;
@@ -140,26 +170,17 @@ public class MTOModClient {
         for (LineData line : lines) {
             poseNormal.transform(line.nX, line.nY, line.nZ, normal);
 
-<<<<<<< Updated upstream
             pose.transform(line.x1, line.y1, line.z1, 1F, pos);
-=======
-            pose.transform(line.x1(), line.y1(), line.z1(), 1F, pos);
->>>>>>> Stashed changes
             buffer.vertex(pos.x, pos.y, pos.z)
                 .color(red, green, blue, alpha)
                 .normal(normal.x, normal.y, normal.z)
                 .endVertex();
 
-<<<<<<< Updated upstream
             pose.transform(line.x2, line.y2, line.z2, 1F, pos);
-=======
-            pose.transform(line.x2(), line.y2(), line.z2(), 1F, pos);
->>>>>>> Stashed changes
             buffer.vertex(pos.x, pos.y, pos.z)
                 .color(red, green, blue, alpha)
                 .normal(normal.x, normal.y, normal.z)
                 .endVertex();
-<<<<<<< Updated upstream
         }
     }
 
@@ -184,8 +205,6 @@ public class MTOModClient {
             this.nX = nX;
             this.nY = nY;
             this.nZ = nZ;
-=======
->>>>>>> Stashed changes
         }
     }
 }
